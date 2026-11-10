@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Smart Expense Tracker</h1>
+    <p>Track what comes in, see where it goes, stay inside your budget.</p>
+  </header>
+
+  <main>
+    <section class="summary" aria-label="Summary">
+      <div class="balance">
+        <span class="label">Remaining balance</span>
+        <strong id="balance">₹0</strong>
+      </div>
+      <div class="pair">
+        <div><span class="label">Total income</span><strong id="income" class="pos">₹0</strong></div>
+        <div><span class="label">Total spending</span><strong id="spent" class="neg">₹0</strong></div>
+      </div>
+      <div class="budget">
+        <div class="budget-head">
+          <span class="label">Monthly budget</span>
+          <form id="budgetForm">
+            <input id="budgetInput" type="number" min="0" step="1" placeholder="Set budget (₹)" aria-label="Monthly budget">
+            <button type="submit" class="ghost">Save budget</button>
+          </form>
+        </div>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="bar"><span id="barFill"></span></div>
+        <p id="budgetMsg" class="hint">Set a monthly budget to track this month's spending.</p>
+      </div>
+    </section>
+
+    <div class="grid">
+      <div class="col">
+        <section class="card">
+          <h2>Add a transaction</h2>
+          <form id="txForm" novalidate>
+            <div class="toggle" role="radiogroup" aria-label="Type">
+              <input type="radio" name="type" id="tExpense" value="expense" checked>
+              <label for="tExpense">Expense</label>
+              <input type="radio" name="type" id="tIncome" value="income">
+              <label for="tIncome">Income</label>
+            </div>
+            <label>Description
+              <input id="title" type="text" maxlength="40" placeholder="e.g. Lunch at canteen" required>
+            </label>
+            <div class="row">
+              <label>Amount (₹)
+                <input id="amount" type="number" min="0.01" step="0.01" placeholder="0" required>
+              </label>
+              <label>Date
+                <input id="date" type="date" required>
+              </label>
+            </div>
+            <label>Category
+              <select id="category"></select>
+            </label>
+            <p id="formError" class="error" role="alert"></p>
+            <button type="submit" class="primary">Add transaction</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Spending by category</h2>
+          <div class="chart-wrap">
+            <canvas id="chart" width="240" height="240" aria-label="Doughnut chart of spending by category"></canvas>
+            <p id="chartEmpty" class="hint">Add an expense to see your chart.</p>
+          </div>
+          <ul id="legend" class="legend"></ul>
+        </section>
+      </div>
+
+      <section class="card list-card">
+        <div class="list-head">
+          <h2>Transactions</h2>
+          <div class="filters" id="filters">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="expense">Expenses</button>
+            <button class="chip" data-filter="income">Income</button>
+          </div>
+        </div>
+        <ul id="list" class="list"></ul>
+        <p id="empty" class="hint">No transactions yet. Add your first one on the left.</p>
+        <button id="clearAll" class="ghost danger">Delete all records</button>
+      </section>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
