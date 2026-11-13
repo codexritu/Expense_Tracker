@@ -4,20 +4,65 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Smart Expense Tracker</title>
+  <script>try{var t=localStorage.getItem("smartExpenseTheme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="top">
-    <h1>Smart Expense Tracker</h1>
-    <p>Track what comes in, see where it goes, stay inside your budget.</p>
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="#home">Smart Expense Tracker</a>
+      <nav class="nav" aria-label="Main">
+        <a href="#home" data-view="home">Home</a>
+        <a href="#dashboard" data-view="dashboard">Dashboard</a>
+        <a href="#transactions" data-view="transactions">Transactions</a>
+        <a href="#insights" data-view="insights">Insights</a>
+        <a href="#about" data-view="about">About</a>
+      </nav>
+      <button type="button" id="themeBtn" class="ghost theme-btn" aria-pressed="false">Night mode</button>
+    </div>
   </header>
+  <div class="monthbar" id="monthbar" hidden><label for="monthSel" class="label">Showing</label><select id="monthSel"></select></div>
 
   <main>
-    <section class="summary" aria-label="Summary">
+    <!-- HOME -->
+    <section class="view" id="view-home">
+      <div class="hero">
+        <span class="kicker">my money notebook</span>
+        <h1>Know where every rupee goes.</h1>
+        <p>A simple, friendly expense tracker. Note down what comes in and what goes out, stay inside your monthly budget, and save up for the things you actually want.</p>
+        <div class="cta">
+          <a class="btn solid" href="#dashboard">Open dashboard</a>
+          <a class="btn" href="#about">About the project</a>
+        </div>
+      </div>
+
+      <h2 class="section-title">What you can do</h2>
+      <div class="features">
+        <article class="feature"><h3>Add income &amp; expenses</h3><p>Log money in and out in seconds, with one-tap shortcuts for things like chai and auto fare.</p></article>
+        <article class="feature"><h3>Smart categories</h3><p>Food, Travel, Shopping, Bills and more, so you can see what really eats your money.</p></article>
+        <article class="feature"><h3>Monthly budget</h3><p>Set a limit and watch the bar turn orange at 80% and red when you cross it.</p></article>
+        <article class="feature"><h3>Live charts</h3><p>Hover the doughnut chart to see amounts, and click a slice to filter your entries.</p></article>
+        <article class="feature"><h3>Savings goal</h3><p>Pick a target like a new laptop and track how close your balance is to it.</p></article>
+        <article class="feature"><h3>Private by design</h3><p>Everything is saved in your own browser. No sign-up, no account, nothing leaves your device.</p></article>
+      </div>
+
+      <h2 class="section-title">How it works</h2>
+      <ol class="steps">
+        <li><b>Add an entry</b>Go to the dashboard and note down an income or an expense.</li>
+        <li><b>Watch it update</b>Your balance, budget bar and chart change instantly.</li>
+        <li><b>Review &amp; improve</b>Open Insights for smart notes and a month-by-month summary.</li>
+      </ol>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="view" id="view-dashboard" hidden>
+      <h2 class="page-title">Dashboard</h2>
+      <section class="summary" aria-label="Summary">
       <div class="balance">
-        <span class="label">Remaining balance</span>
+        <span class="label">Remaining balance <small>(all time)</small></span>
         <strong id="balance">₹0</strong>
       </div>
       <div class="pair">
@@ -36,11 +81,12 @@
         <p id="budgetMsg" class="hint">Set a monthly budget to track this month's spending.</p>
       </div>
     </section>
-
-    <div class="grid">
-      <div class="col">
-        <section class="card">
-          <h2>Add a transaction</h2>
+      <div class="grid">
+        <div class="col left">
+          <section class="card">
+          <h2 id="formTitle">New entry</h2>
+          <p class="hint quick-hint">Quick add (today's date):</p>
+          <div class="quick" id="quick"></div>
           <form id="txForm" novalidate>
             <div class="toggle" role="radiogroup" aria-label="Type">
               <input type="radio" name="type" id="tExpense" value="expense" checked>
@@ -48,7 +94,7 @@
               <input type="radio" name="type" id="tIncome" value="income">
               <label for="tIncome">Income</label>
             </div>
-            <label>Description
+            <label id="titleWrap">Description
               <input id="title" type="text" maxlength="40" placeholder="e.g. Lunch at canteen" required>
             </label>
             <div class="row">
@@ -63,35 +109,104 @@
               <select id="category"></select>
             </label>
             <p id="formError" class="error" role="alert"></p>
-            <button type="submit" class="primary">Add transaction</button>
+            <button type="submit" class="primary" id="submitBtn">Add entry</button>
+            <button type="button" class="ghost cancel" id="cancelEdit" hidden>Cancel edit</button>
           </form>
         </section>
-
-        <section class="card">
+        </div>
+        <div class="col right">
+          <section class="card">
           <h2>Spending by category</h2>
           <div class="chart-wrap">
             <canvas id="chart" width="240" height="240" aria-label="Doughnut chart of spending by category"></canvas>
             <p id="chartEmpty" class="hint">Add an expense to see your chart.</p>
           </div>
           <ul id="legend" class="legend"></ul>
+          <p class="hint">Hover a slice to see the amount. Click it to filter your list.</p>
+        </section>
+          <section class="card">
+            <h2>Recent entries</h2>
+            <ul id="recentList" class="recent"></ul>
+            <p id="recentEmpty" class="hint">Nothing here yet. Add your first entry.</p>
+            <a class="more" href="#transactions">See all entries &rarr;</a>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section class="view" id="view-transactions" hidden>
+      <h2 class="page-title">Transactions</h2>
+      <section class="card list-card">
+          <div class="list-head">
+                        <div class="filters" id="filters">
+              <button class="chip active" data-filter="all">All</button>
+              <button class="chip" data-filter="expense">Expenses</button>
+              <button class="chip" data-filter="income">Income</button>
+              <button class="chip active" id="catPill" hidden></button>
+            </div>
+          </div>
+          <input id="search" class="search" type="search" placeholder="Search entries…" aria-label="Search entries">
+          <ul id="list" class="list"></ul>
+          <p id="empty" class="hint">No entries yet. Write your first one on the left.</p>
+          <div class="actions">
+            <button id="exportCsv" class="ghost">Export CSV</button>
+            <button id="clearAll" class="ghost danger">Delete all records</button>
+          </div>
+        </section>
+    </section>
+
+    <!-- INSIGHTS -->
+    <section class="view" id="view-insights" hidden>
+      <h2 class="page-title">Insights</h2>
+      <div class="grid">
+        <div class="col right">
+          <section class="card">
+          <h2>Smart notes</h2>
+          <ul id="insightList" class="notes"></ul>
+        </section>
+          <section class="card">
+          <h2>Savings goal</h2>
+          <div class="bar goalbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="goalBar"><span id="goalFill"></span></div>
+          <p id="goalMsg" class="hint"></p>
+          <form id="goalForm" class="goal-form">
+            <label>Goal name<input id="goalName" type="text" maxlength="30" placeholder="e.g. New laptop"></label>
+            <label>Target (₹)<input id="goalTarget" type="number" min="1" step="1" placeholder="40000"></label>
+            <button type="submit" class="ghost">Save goal</button>
+          </form>
+        </section>
+        </div>
+        <section class="card">
+          <h2>Month by month</h2>
+          <div class="tablewrap">
+            <table class="ov">
+              <thead><tr><th>Month</th><th>Income</th><th>Spent</th><th>Saved</th></tr></thead>
+              <tbody id="ovBody"></tbody>
+            </table>
+          </div>
+          <p id="ovEmpty" class="hint">No data yet. Your monthly summary appears here once you add entries.</p>
+          <p class="hint">Click a month to see its entries.</p>
         </section>
       </div>
+    </section>
 
-      <section class="card list-card">
-        <div class="list-head">
-          <h2>Transactions</h2>
-          <div class="filters" id="filters">
-            <button class="chip active" data-filter="all">All</button>
-            <button class="chip" data-filter="expense">Expenses</button>
-            <button class="chip" data-filter="income">Income</button>
-          </div>
-        </div>
-        <ul id="list" class="list"></ul>
-        <p id="empty" class="hint">No transactions yet. Add your first one on the left.</p>
-        <button id="clearAll" class="ghost danger">Delete all records</button>
-      </section>
-    </div>
+    <!-- ABOUT -->
+    <section class="view" id="view-about" hidden>
+      <h2 class="page-title">About</h2>
+      <div class="features">
+        <article class="feature"><h3>What is this?</h3><p>Smart Expense Tracker is a website that helps you track daily expenses and manage your budget. It shows your balance, spending by category and your progress towards a savings goal.</p></article>
+        <article class="feature"><h3>Built with</h3><p><b>HTML</b> for structure, <b>CSS</b> for the notebook look and night mode, and <b>JavaScript</b> for all the logic. The chart is drawn with the Canvas API, with no libraries.</p></article>
+        <article class="feature"><h3>Where is my data?</h3><p>In your browser's Local Storage, on this device only. Clearing your browser data removes it, so use Export CSV on the Transactions page to keep a copy.</p></article>
+        <article class="feature"><h3>Tips</h3><p>Use the quick-add buttons for daily small spends, set a monthly budget first, and check Insights at the end of each week.</p></article>
+        <article class="feature"><h3>Features</h3><p>Income &amp; expenses, categories, budget bar, savings goal, edit &amp; undo, search, month picker, CSV export, smart notes and night mode.</p></article>
+        <article class="feature"><h3>Good to know</h3><p>Numbers are in Indian rupees (₹). Your Remaining balance is all-time, while income, spending and the chart follow the month you select.</p></article>
+      </div>
+    </section>
   </main>
+
+  <footer class="footer">Smart Expense Tracker &middot; your data stays in your browser</footer>
+
+  <div id="toast" class="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo" type="button">Undo</button></div>
 
   <script src="script.js"></script>
 </body>
